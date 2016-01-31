@@ -261,6 +261,18 @@ class pager_rx(grc_wxgui.top_block_gui):
         self.channel_rate = channel_rate
         self.wxgui_waterfallsink2_1.set_sample_rate(self.channel_rate)
 
+class queue_runner_with_timestamp(pager.queue_runner):
+    def run(self):
+        import datetime
+        while 1:
+            msg = self.msgq.delete_head() # Blocking read
+            if msg.type() != 0:
+                break
+            page = join(split(msg.to_string(), chr(128)), '|')
+            s = pager.pager_utils.make_printable(page)
+            timestamp = datetime.datetime.utcnow()
+            print timestamp, msg.type(), s
+
 if __name__ == '__main__':
     import ctypes
     import os
@@ -276,7 +288,7 @@ if __name__ == '__main__':
     # Flow graph emits pages into message queue
     queue = gr.msg_queue()
     tb = pager_rx(options, queue)
-    runner = pager.queue_runner(queue)
+    runner = queue_runner_with_timestamp(queue)
 
     #tb = pager_rx()
     tb.Start(True)
