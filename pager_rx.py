@@ -264,6 +264,7 @@ class pager_rx(grc_wxgui.top_block_gui):
 class queue_runner_with_timestamp(pager.queue_runner):
     def run(self):
         import datetime
+        from string import split, join
         while 1:
             msg = self.msgq.delete_head() # Blocking read
             if msg.type() != 0:
